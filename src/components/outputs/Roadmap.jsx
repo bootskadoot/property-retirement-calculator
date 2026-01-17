@@ -292,7 +292,7 @@ function LeadCaptureForm() {
                   onChange={(e) => setBuyingSoon(e.target.checked)}
                   className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-400"
                 />
-                <span className="text-xs text-gray-500">I'm looking to buy property in the next 12 months</span>
+                <span className="text-xs text-gray-500">I'm looking to buy property in the next 12 months <span className="text-gray-400">(optional)</span></span>
               </label>
 
               <label className="flex items-start gap-2 cursor-pointer">
@@ -303,7 +303,7 @@ function LeadCaptureForm() {
                   onChange={(e) => setOpenToContact(e.target.checked)}
                   className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-400"
                 />
-                <span className="text-xs text-gray-500">I'm open to hearing from buyers agents or brokers who specialise in property investment</span>
+                <span className="text-xs text-gray-500">I'm open to hearing from buyers agents or brokers who specialise in property investment <span className="text-gray-400">(optional)</span></span>
               </label>
             </div>
 
