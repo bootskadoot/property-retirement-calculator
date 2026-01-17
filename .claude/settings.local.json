@@ -10,7 +10,17 @@
       "Bash(git commit:*)",
       "Bash(git config:*)",
       "Bash(git branch:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(netlify status:*)",
+      "Bash(netlify sites:list:*)",
+      "Bash(netlify link:*)",
+      "Bash(netlify deploy:list:*)",
+      "Bash(netlify api:*)",
+      "Bash(npx netlify-cli:*)",
+      "Bash(curl:*)",
+      "WebFetch(domain:property-retirement-calc.netlify.app)",
+      "Bash(echo:*)",
+      "Bash(npm install:*)"
     ]
   }
 }

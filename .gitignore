@@ -5,3 +5,6 @@ dist
 .env
 .env.*
 nul
+
+# Local Netlify folder
+.netlify

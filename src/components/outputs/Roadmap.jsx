@@ -196,37 +196,55 @@ function YearRow({ yearData, isFirst, isPurchaseYear }) {
   )
 }
 
-function LeadCaptureForm() {
+function LeadCaptureForm({ roadmapData }) {
   const [email, setEmail] = useState('')
   const [buyingSoon, setBuyingSoon] = useState(false)
   const [openToContact, setOpenToContact] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [error, setError] = useState(null)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!email) return
 
     setIsSubmitting(true)
+    setError(null)
 
     try {
-      const formData = new FormData()
-      formData.append('form-name', 'roadmap-lead')
-      formData.append('email', email)
-      formData.append('buyingSoon', buyingSoon ? 'Yes' : 'No')
-      formData.append('openToContact', openToContact ? 'Yes' : 'No')
-
-      const response = await fetch('/', {
+      // Call the Netlify function to generate and send PDF
+      const response = await fetch('/.netlify/functions/send-roadmap-pdf', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(formData).toString()
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          buyingSoon,
+          openToContact,
+          roadmapData
+        })
       })
 
-      if (response.ok) {
+      const result = await response.json()
+
+      if (response.ok && result.success) {
         setIsSubmitted(true)
+
+        // Also submit to Netlify Forms for lead tracking
+        const formData = new FormData()
+        formData.append('form-name', 'roadmap-lead')
+        formData.append('email', email)
+        formData.append('buyingSoon', buyingSoon ? 'Yes' : 'No')
+        formData.append('openToContact', openToContact ? 'Yes' : 'No')
+        fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(formData).toString()
+        }).catch(() => {}) // Ignore errors for backup form submission
+      } else {
+        setError(result.error || 'Something went wrong. Please try again.')
       }
     } catch (err) {
-      // Silently fail - don't disrupt user experience
+      setError('Unable to send email. Please try again later.')
     } finally {
       setIsSubmitting(false)
     }
@@ -234,19 +252,19 @@ function LeadCaptureForm() {
 
   if (isSubmitted) {
     return (
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+      <div className="bg-green-50 rounded-lg border border-green-200 p-4">
+        <div className="flex items-center gap-2 text-sm text-green-700">
           <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
-          <span>Thanks. We'll send your roadmap summary shortly.</span>
+          <span>Done! Check your inbox for your PDF roadmap.</span>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="mt-8 pt-6 border-t border-gray-200">
+    <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
       <form onSubmit={handleSubmit} name="roadmap-lead" method="POST" data-netlify="true">
         <input type="hidden" name="form-name" value="roadmap-lead" />
 
@@ -306,6 +324,10 @@ function LeadCaptureForm() {
                 <span className="text-xs text-gray-500">I'm open to hearing from buyers agents or brokers who specialise in property investment <span className="text-gray-400">(optional)</span></span>
               </label>
             </div>
+
+            {error && (
+              <p className="text-xs text-red-600 mt-2">{error}</p>
+            )}
 
             <p className="text-xs text-gray-400 mt-2">No spam, just your summary.</p>
           </div>
@@ -444,6 +466,28 @@ export default function Roadmap() {
           </div>
         </div>
       </Card>
+
+      {/* Lead Capture - at top for visibility */}
+      <LeadCaptureForm
+        roadmapData={{
+          projectedIncome: goalProgress?.projectedAnnualIncome || 0,
+          targetYears,
+          totalProperties: totalPropertyCount,
+          debtFreeProperties: saleScenario?.trulyDebtFreeCount || 0,
+          portfolioValue: (saleScenario?.debtFreeProperties || []).reduce((sum, p) => sum + p.currentValue, 0),
+          currentProperties: state.properties.length,
+          cashToInvest: state.cashAllocated || 0,
+          incomeGoal: annualIncomeGoal,
+          propertiesBought,
+          propertiesToSell: saleScenario?.propertiesToSell?.length || 0,
+          assumptions: {
+            appreciationRate: assumptions.appreciationRate,
+            rentalYield: assumptions.rentalYield,
+            interestRate: assumptions.interestRate,
+            averagePropertyPrice: assumptions.averagePropertyPrice,
+          }
+        }}
+      />
 
       {/* Borrowing Power Disclaimer */}
       <div className="flex items-start gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
@@ -729,9 +773,6 @@ export default function Roadmap() {
           </p>
         </div>
       )}
-
-      {/* Subtle Lead Capture */}
-      <LeadCaptureForm />
     </div>
   )
 }
