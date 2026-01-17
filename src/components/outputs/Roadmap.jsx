@@ -196,6 +196,41 @@ function YearRow({ yearData, isFirst, isPurchaseYear }) {
   )
 }
 
+function CollapsibleSection({ title, subtitle, children, defaultOpen = false, badge }) {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
+
+  return (
+    <Card>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between text-left"
+      >
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            {badge && (
+              <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">
+                {badge}
+              </span>
+            )}
+          </div>
+          {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
+        </div>
+        <svg
+          className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {isOpen && <div className="mt-4">{children}</div>}
+    </Card>
+  )
+}
+
 export default function Roadmap() {
   const { state } = useCalculator()
   const {
@@ -291,6 +326,16 @@ export default function Roadmap() {
         </div>
       </Card>
 
+      {/* Borrowing Power Disclaimer */}
+      <div className="flex items-start gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
+        <svg className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p className="text-xs text-gray-500">
+          This projection assumes you can secure financing for each purchase. In practice, your borrowing capacity depends on income, existing debts, and lender policies. Consider speaking with a mortgage broker to understand your limits.
+        </p>
+      </div>
+
       {/* Actionable Insights */}
       <WhatToDoNext insights={insights} />
 
@@ -300,9 +345,14 @@ export default function Roadmap() {
       {/* Levers Analysis - what has biggest impact */}
       <LeversCard leversAnalysis={leversAnalysis} />
 
-      {/* Year-by-Year Timeline */}
-      <Card title="Year-by-Year Journey" subtitle={`${targetYears} year projection - click each year to expand`}>
-        <div className="mt-4 space-y-1">
+      {/* Year-by-Year Timeline - Collapsible */}
+      <CollapsibleSection
+        title="Year-by-Year Journey"
+        subtitle="Expand to see detailed progression"
+        badge={`${targetYears} years`}
+        defaultOpen={false}
+      >
+        <div className="space-y-1">
           {projection.map((yearData, index) => (
             <YearRow
               key={yearData.year}
@@ -324,11 +374,16 @@ export default function Roadmap() {
             <span>Projected future purchase</span>
           </div>
         </div>
-      </Card>
+      </CollapsibleSection>
 
-      {/* Strategic Sale Plan */}
+      {/* Strategic Sale Plan - Collapsible */}
       {saleScenario && saleScenario.propertiesToSell.length > 0 && (
-        <Card title="Strategic Sale Plan" subtitle={`Year ${targetYears} execution`}>
+        <CollapsibleSection
+          title="Strategic Sale Plan"
+          subtitle={`Year ${targetYears} execution`}
+          badge={`${saleScenario.propertiesToSell.length} to sell`}
+          defaultOpen={false}
+        >
           <div className="space-y-4">
             {/* Properties to Sell */}
             <div>
@@ -430,7 +485,7 @@ export default function Roadmap() {
               </div>
             )}
           </div>
-        </Card>
+        </CollapsibleSection>
       )}
 
       {/* Final Numbers */}

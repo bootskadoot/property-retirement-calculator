@@ -9,7 +9,7 @@ export const DEFAULTS = {
   taxBracket: 0.37,            // 37% marginal rate estimate
   incomeMultiplier: 6,         // 6x income for borrowing
   refinanceInterval: 2,        // Years between refinance opportunities
-  averagePropertyPrice: 1000000, // $1M average Sydney property
+  averagePropertyPrice: 600000, // $600k target purchase price
   // Realistic costs
   holdingCostsRate: 0.025,     // 2.5% of property value/year (management, maintenance, insurance, rates)
   vacancyRate: 0.04,           // 4% (~2 weeks vacancy/year)
