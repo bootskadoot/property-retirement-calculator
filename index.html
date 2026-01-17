@@ -12,7 +12,7 @@
     <script type="module" src="/src/main.jsx"></script>
 
     <!-- Netlify Forms - hidden form for detection -->
-    <form name="contact" netlify netlify-honeypot="bot-field" hidden>
+    <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
       <input name="bot-field" />
       <input name="name" />
       <input name="email" />
@@ -22,7 +22,7 @@
     </form>
 
     <!-- Netlify Forms - roadmap lead capture -->
-    <form name="roadmap-lead" netlify netlify-honeypot="bot-field" hidden>
+    <form name="roadmap-lead" data-netlify="true" netlify-honeypot="bot-field" hidden>
       <input name="bot-field" />
       <input name="email" />
       <input name="buyingSoon" />
