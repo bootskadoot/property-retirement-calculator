@@ -31,6 +31,7 @@ export default function ContactModal({ isOpen, onClose }) {
     try {
       const formData = new FormData()
       formData.append('form-name', 'contact')
+      formData.append('subject', formState.email) // Use email as subject in Netlify Forms
       Object.entries(formState).forEach(([key, value]) => {
         // Convert booleans to Yes/No for Netlify Forms
         if (typeof value === 'boolean') {
