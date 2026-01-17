@@ -196,6 +196,125 @@ function YearRow({ yearData, isFirst, isPurchaseYear }) {
   )
 }
 
+function LeadCaptureForm() {
+  const [email, setEmail] = useState('')
+  const [buyingSoon, setBuyingSoon] = useState(false)
+  const [openToContact, setOpenToContact] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!email) return
+
+    setIsSubmitting(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('form-name', 'roadmap-lead')
+      formData.append('email', email)
+      formData.append('buyingSoon', buyingSoon ? 'Yes' : 'No')
+      formData.append('openToContact', openToContact ? 'Yes' : 'No')
+
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData).toString()
+      })
+
+      if (response.ok) {
+        setIsSubmitted(true)
+      }
+    } catch (err) {
+      // Silently fail - don't disrupt user experience
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (isSubmitted) {
+    return (
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <span>Thanks. We'll send your roadmap summary shortly.</span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mt-8 pt-6 border-t border-gray-200">
+      <form onSubmit={handleSubmit} name="roadmap-lead" method="POST" data-netlify="true">
+        <input type="hidden" name="form-name" value="roadmap-lead" />
+
+        {/* Honeypot */}
+        <p className="hidden">
+          <label>Don't fill this out: <input name="bot-field" /></label>
+        </p>
+
+        <div className="flex items-start gap-3">
+          <svg className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <div className="flex-1">
+            <p className="text-sm text-gray-600 mb-3">
+              Want a PDF of this roadmap? We'll email you a summary you can revisit anytime.
+            </p>
+
+            <div className="flex gap-2 mb-3">
+              <input
+                type="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+                className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-400 focus:border-gray-400 outline-none"
+              />
+              <button
+                type="submit"
+                disabled={isSubmitting || !email}
+                className="px-4 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md transition-colors disabled:opacity-50"
+              >
+                {isSubmitting ? '...' : 'Send'}
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="buyingSoon"
+                  checked={buyingSoon}
+                  onChange={(e) => setBuyingSoon(e.target.checked)}
+                  className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-400"
+                />
+                <span className="text-xs text-gray-500">I'm looking to buy property in the next 12 months</span>
+              </label>
+
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="openToContact"
+                  checked={openToContact}
+                  onChange={(e) => setOpenToContact(e.target.checked)}
+                  className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-400"
+                />
+                <span className="text-xs text-gray-500">I'm open to hearing from buyers agents or brokers who specialise in property investment</span>
+              </label>
+            </div>
+
+            <p className="text-xs text-gray-400 mt-2">No spam, just your summary.</p>
+          </div>
+        </div>
+      </form>
+    </div>
+  )
+}
+
 function CollapsibleSection({ title, subtitle, children, defaultOpen = false, badge }) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
 
@@ -610,6 +729,9 @@ export default function Roadmap() {
           </p>
         </div>
       )}
+
+      {/* Subtle Lead Capture */}
+      <LeadCaptureForm />
     </div>
   )
 }
