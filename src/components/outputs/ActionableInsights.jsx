@@ -124,6 +124,9 @@ export function WhatToDoNext({ insights }) {
           <InsightCard key={index} insight={insight} />
         ))}
       </div>
+      <p className="text-xs text-gray-400 mt-4">
+        Need guidance on next steps? Reach out via Contact Us.
+      </p>
     </Card>
   )
 }
