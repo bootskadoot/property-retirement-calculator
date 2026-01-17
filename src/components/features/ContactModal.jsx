@@ -7,15 +7,20 @@ export default function ContactModal({ isOpen, onClose }) {
     email: '',
     phone: '',
     inquiryType: 'General question',
-    message: ''
+    message: '',
+    buyingSoon: false,
+    openToContact: false
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [error, setError] = useState(null)
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormState(prev => ({ ...prev, [name]: value }))
+    const { name, value, type, checked } = e.target
+    setFormState(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }))
   }
 
   const handleSubmit = async (e) => {
@@ -27,7 +32,12 @@ export default function ContactModal({ isOpen, onClose }) {
       const formData = new FormData()
       formData.append('form-name', 'contact')
       Object.entries(formState).forEach(([key, value]) => {
-        formData.append(key, value)
+        // Convert booleans to Yes/No for Netlify Forms
+        if (typeof value === 'boolean') {
+          formData.append(key, value ? 'Yes' : 'No')
+        } else {
+          formData.append(key, value)
+        }
       })
 
       const response = await fetch('/', {
@@ -43,7 +53,9 @@ export default function ContactModal({ isOpen, onClose }) {
           email: '',
           phone: '',
           inquiryType: 'General question',
-          message: ''
+          message: '',
+          buyingSoon: false,
+          openToContact: false
         })
       } else {
         throw new Error('Form submission failed')
@@ -168,10 +180,37 @@ export default function ContactModal({ isOpen, onClose }) {
             name="message"
             value={formState.message}
             onChange={handleChange}
-            rows={4}
+            rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             placeholder="How can we help you?"
           />
+        </div>
+
+        {/* Qualifying Questions */}
+        <div className="space-y-3 pt-2 border-t border-gray-200">
+          <p className="text-sm font-medium text-gray-700">Help us understand your situation <span className="text-gray-400 font-normal">(optional)</span></p>
+
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              name="buyingSoon"
+              checked={formState.buyingSoon}
+              onChange={handleChange}
+              className="mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span className="text-sm text-gray-600">I'm looking to buy property in the next 12 months</span>
+          </label>
+
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              name="openToContact"
+              checked={formState.openToContact}
+              onChange={handleChange}
+              className="mt-0.5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span className="text-sm text-gray-600">I'm open to hearing from buyers agents or brokers who specialise in property investment</span>
+          </label>
         </div>
 
         {error && (

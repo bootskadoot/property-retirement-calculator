@@ -4,6 +4,7 @@ import { useCalculator } from '../../context/CalculatorContext'
 import { formatCurrency, formatPercent, formatYears } from '../../utils/formatters'
 import Card from '../ui/Card'
 import { WhatToDoNext, GapAnalysisCard, LeversCard } from './ActionableInsights'
+import ContactModal from '../features/ContactModal'
 
 function YearRow({ yearData, isFirst, isPurchaseYear }) {
   const [expanded, setExpanded] = useState(false)
@@ -196,143 +197,24 @@ function YearRow({ yearData, isFirst, isPurchaseYear }) {
   )
 }
 
-function LeadCaptureForm({ roadmapData }) {
-  const [email, setEmail] = useState('')
-  const [buyingSoon, setBuyingSoon] = useState(false)
-  const [openToContact, setOpenToContact] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [error, setError] = useState(null)
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!email) return
-
-    setIsSubmitting(true)
-    setError(null)
-
-    try {
-      // Call the Netlify function to generate and send PDF
-      const response = await fetch('/.netlify/functions/send-roadmap-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          buyingSoon,
-          openToContact,
-          roadmapData
-        })
-      })
-
-      const result = await response.json()
-
-      if (response.ok && result.success) {
-        setIsSubmitted(true)
-
-        // Also submit to Netlify Forms for lead tracking
-        const formData = new FormData()
-        formData.append('form-name', 'roadmap-lead')
-        formData.append('email', email)
-        formData.append('buyingSoon', buyingSoon ? 'Yes' : 'No')
-        formData.append('openToContact', openToContact ? 'Yes' : 'No')
-        fetch('/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams(formData).toString()
-        }).catch(() => {}) // Ignore errors for backup form submission
-      } else {
-        setError(result.error || 'Something went wrong. Please try again.')
-      }
-    } catch (err) {
-      setError('Unable to send email. Please try again later.')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  if (isSubmitted) {
-    return (
-      <div className="bg-green-50 rounded-lg border border-green-200 p-4">
-        <div className="flex items-center gap-2 text-sm text-green-700">
-          <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          <span>Done! Check your inbox for your roadmap summary.</span>
-        </div>
-      </div>
-    )
-  }
-
+function ContactUsPrompt({ onContactClick }) {
   return (
     <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
-      <form onSubmit={handleSubmit} name="roadmap-lead" method="POST" data-netlify="true">
-        <input type="hidden" name="form-name" value="roadmap-lead" />
-
-        {/* Honeypot */}
-        <p className="hidden">
-          <label>Don't fill this out: <input name="bot-field" /></label>
+      <div className="flex items-center gap-3">
+        <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p className="text-sm text-gray-600">
+          Need guidance on next steps?{' '}
+          <button
+            type="button"
+            onClick={onContactClick}
+            className="text-primary-600 hover:text-primary-700 font-medium hover:underline"
+          >
+            Reach out via Contact Us
+          </button>
         </p>
-
-        <div className="flex items-start gap-3">
-          <svg className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-          <div className="flex-1">
-            <p className="text-sm text-gray-600 mb-3">
-              Save this roadmap? We'll email you a summary you can revisit anytime.
-            </p>
-
-            <div className="flex gap-2 mb-3">
-              <input
-                type="email"
-                name="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                required
-                className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-400 focus:border-gray-400 outline-none"
-              />
-              <button
-                type="submit"
-                disabled={isSubmitting || !email}
-                className="px-4 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md transition-colors disabled:opacity-50"
-              >
-                {isSubmitting ? '...' : 'Send'}
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              <label className="flex items-start gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="buyingSoon"
-                  checked={buyingSoon}
-                  onChange={(e) => setBuyingSoon(e.target.checked)}
-                  className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-400"
-                />
-                <span className="text-xs text-gray-500">I'm looking to buy property in the next 12 months <span className="text-gray-400">(optional)</span></span>
-              </label>
-
-              <label className="flex items-start gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="openToContact"
-                  checked={openToContact}
-                  onChange={(e) => setOpenToContact(e.target.checked)}
-                  className="mt-0.5 rounded border-gray-300 text-gray-600 focus:ring-gray-400"
-                />
-                <span className="text-xs text-gray-500">I'm open to hearing from buyers agents or brokers who specialise in property investment <span className="text-gray-400">(optional)</span></span>
-              </label>
-            </div>
-
-            {error && (
-              <p className="text-xs text-red-600 mt-2">{error}</p>
-            )}
-
-            <p className="text-xs text-gray-400 mt-2">No spam, just your summary.</p>
-          </div>
-        </div>
-      </form>
+      </div>
     </div>
   )
 }
@@ -374,6 +256,7 @@ function CollapsibleSection({ title, subtitle, children, defaultOpen = false, ba
 
 export default function Roadmap() {
   const { state } = useCalculator()
+  const [isContactOpen, setIsContactOpen] = useState(false)
   const {
     projection,
     saleScenario,
@@ -467,27 +350,8 @@ export default function Roadmap() {
         </div>
       </Card>
 
-      {/* Lead Capture - at top for visibility */}
-      <LeadCaptureForm
-        roadmapData={{
-          projectedIncome: goalProgress?.projectedAnnualIncome || 0,
-          targetYears,
-          totalProperties: totalPropertyCount,
-          debtFreeProperties: saleScenario?.trulyDebtFreeCount || 0,
-          portfolioValue: (saleScenario?.debtFreeProperties || []).reduce((sum, p) => sum + p.currentValue, 0),
-          currentProperties: state.properties.length,
-          cashToInvest: state.cashAllocated || 0,
-          incomeGoal: annualIncomeGoal,
-          propertiesBought,
-          propertiesToSell: saleScenario?.propertiesToSell?.length || 0,
-          assumptions: {
-            appreciationRate: assumptions.appreciationRate,
-            rentalYield: assumptions.rentalYield,
-            interestRate: assumptions.interestRate,
-            averagePropertyPrice: assumptions.averagePropertyPrice,
-          }
-        }}
-      />
+      {/* Contact Us Prompt */}
+      <ContactUsPrompt onContactClick={() => setIsContactOpen(true)} />
 
       {/* Borrowing Power Disclaimer */}
       <div className="flex items-start gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
@@ -773,6 +637,9 @@ export default function Roadmap() {
           </p>
         </div>
       )}
+
+      {/* Contact Modal */}
+      <ContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </div>
   )
 }
