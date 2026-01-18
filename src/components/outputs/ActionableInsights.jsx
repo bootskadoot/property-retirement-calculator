@@ -131,113 +131,51 @@ export function WhatToDoNext({ insights }) {
 export function GapAnalysisCard({ gapAnalysis, targetYears }) {
   if (!gapAnalysis) return null
 
-  const { options, actualOutcome, incomeShortfall } = gapAnalysis
+  const { actualOutcome } = gapAnalysis
 
   return (
     <Card
-      title="How To Close The Gap"
-      subtitle={`You're ${formatCurrency(incomeShortfall)}/year short of your goal`}
+      title={`What You'd Actually Achieve`}
+      subtitle={`Based on your current inputs over ${targetYears} years`}
     >
-      <div className="mt-4 space-y-4">
-        {/* Options to close the gap */}
-        <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-3">Options to reach your goal:</h4>
-          <div className="space-y-2">
-            {options.additionalProperties.description && (
-              <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  +{options.additionalProperties.count}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-blue-900">More Properties</p>
-                  <p className="text-xs text-blue-700">{options.additionalProperties.description}</p>
-                </div>
-              </div>
-            )}
-
-            {options.additionalCash.description && (
-              <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-100">
-                <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-green-900">More Starting Cash</p>
-                  <p className="text-xs text-green-700">{options.additionalCash.description}</p>
-                </div>
-              </div>
-            )}
-
-            {options.additionalTime.description && (
-              <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg border border-purple-100">
-                <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
-                  +{options.additionalTime.years}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-purple-900">More Time</p>
-                  <p className="text-xs text-purple-700">{options.additionalTime.description}</p>
-                </div>
-              </div>
-            )}
-
-            {options.lowerGoal.description && actualOutcome.annualIncome > 0 && (
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="w-8 h-8 bg-gray-500 text-white rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Adjust Goal</p>
-                  <p className="text-xs text-gray-700">{options.lowerGoal.description}</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* What they'd actually achieve */}
-        <div className="pt-4 border-t border-gray-200">
-          <h4 className="text-sm font-medium text-gray-700 mb-3">What you'd actually achieve in {targetYears} years:</h4>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-2xl font-bold text-gray-900">
-                  {actualOutcome.trulyDebtFree || 0}
-                  {actualOutcome.withRemainingDebt > 0 && (
-                    <span className="text-sm font-normal text-amber-600"> +{actualOutcome.withRemainingDebt}</span>
-                  )}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {actualOutcome.withRemainingDebt > 0
-                    ? 'Debt-free + with debt'
-                    : 'Debt-free properties'}
-                </p>
-              </div>
-              <div>
-                <p className={`text-2xl font-bold ${actualOutcome.annualIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatCurrency(actualOutcome.annualIncome)}
-                </p>
-                <p className="text-xs text-gray-500">Annual passive income</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-purple-600">{formatCurrency(actualOutcome.portfolioValue)}</p>
-                <p className="text-xs text-gray-500">Portfolio value</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-blue-600">{actualOutcome.percentOfGoal}%</p>
-                <p className="text-xs text-gray-500">Of your goal</p>
-              </div>
+      <div className="mt-4">
+        <div className="bg-gray-50 rounded-lg p-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-2xl font-bold text-gray-900">
+                {actualOutcome.trulyDebtFree || 0}
+                {actualOutcome.withRemainingDebt > 0 && (
+                  <span className="text-sm font-normal text-amber-600"> +{actualOutcome.withRemainingDebt}</span>
+                )}
+              </p>
+              <p className="text-xs text-gray-500">
+                {actualOutcome.withRemainingDebt > 0
+                  ? 'Debt-free + with debt'
+                  : 'Debt-free properties'}
+              </p>
             </div>
-            {actualOutcome.remainingDebt > 0 && (
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <p className="text-xs text-amber-700">
-                  Note: {formatCurrency(actualOutcome.remainingDebt)} debt remains, reducing your passive income.
-                </p>
-              </div>
-            )}
+            <div>
+              <p className={`text-2xl font-bold ${actualOutcome.annualIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {formatCurrency(actualOutcome.annualIncome)}
+              </p>
+              <p className="text-xs text-gray-500">Annual passive income</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-purple-600">{formatCurrency(actualOutcome.portfolioValue)}</p>
+              <p className="text-xs text-gray-500">Portfolio value</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-blue-600">{actualOutcome.percentOfGoal}%</p>
+              <p className="text-xs text-gray-500">Of your goal</p>
+            </div>
           </div>
+          {actualOutcome.remainingDebt > 0 && (
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <p className="text-xs text-amber-700">
+                Note: {formatCurrency(actualOutcome.remainingDebt)} debt remains, reducing your passive income.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </Card>

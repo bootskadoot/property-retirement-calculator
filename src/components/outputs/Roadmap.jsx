@@ -3,7 +3,7 @@ import { useCalculations } from '../../hooks/useCalculations'
 import { useCalculator } from '../../context/CalculatorContext'
 import { formatCurrency, formatPercent, formatYears } from '../../utils/formatters'
 import Card from '../ui/Card'
-import { WhatToDoNext, GapAnalysisCard, LeversCard } from './ActionableInsights'
+import { WhatToDoNext, LeversCard } from './ActionableInsights'
 import ContactModal from '../features/ContactModal'
 
 function YearRow({ yearData, isFirst, isPurchaseYear }) {
@@ -266,7 +266,6 @@ export default function Roadmap() {
     annualIncomeGoal,
     assumptions,
     insights,
-    gapAnalysis,
     leversAnalysis
   } = useCalculations()
 
@@ -297,58 +296,153 @@ export default function Roadmap() {
 
   return (
     <div className="space-y-6">
-      {/* Hero Summary */}
-      <Card className={goalProgress?.goalAchieved
-        ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200'
-        : (goalProgress?.projectedAnnualIncome || 0) < 0
-          ? 'bg-gradient-to-br from-red-50 to-rose-50 border-red-200'
-          : 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200'
-      }>
-        <div className="text-center">
-          <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-3 ${
-            goalProgress?.goalAchieved
-              ? 'bg-green-100 text-green-800'
-              : (goalProgress?.projectedAnnualIncome || 0) < 0
-                ? 'bg-red-100 text-red-800'
-                : 'bg-amber-100 text-amber-800'
-          }`}>
-            {goalProgress?.goalAchieved
-              ? 'Goal Achievable'
-              : (goalProgress?.projectedAnnualIncome || 0) < 0
-                ? 'Negative Cash Flow'
-                : 'Goal In Progress'}
-          </div>
-
-          <h2 className={`text-3xl font-bold ${(goalProgress?.projectedAnnualIncome || 0) < 0 ? 'text-red-600' : 'text-gray-900'}`}>
-            {formatCurrency(goalProgress?.projectedAnnualIncome || 0)}
-            <span className="text-lg font-normal text-gray-500">/year</span>
-          </h2>
-
-          <p className="text-gray-600 mt-1">
-            {(goalProgress?.projectedAnnualIncome || 0) < 0
-              ? 'More time or properties needed'
-              : `Projected passive income in ${formatYears(targetYears)}`}
-          </p>
-
-          <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-200">
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{totalPropertyCount}</p>
-              <p className="text-xs text-gray-500">Properties at Peak</p>
+      {/* What You'd Likely Achieve - Combined summary section */}
+      <Card
+        title="What You'd Likely Achieve"
+        subtitle={`Based on your current inputs over ${targetYears} years`}
+        className={goalProgress?.goalAchieved
+          ? 'border-green-200'
+          : (goalProgress?.projectedAnnualIncome || 0) < 0
+            ? 'border-red-200'
+            : 'border-amber-200'
+        }
+      >
+        {/* Main outcome */}
+        <div className={`-mx-4 -mt-4 px-4 py-4 mb-4 ${
+          goalProgress?.goalAchieved
+            ? 'bg-gradient-to-br from-green-50 to-emerald-50'
+            : (goalProgress?.projectedAnnualIncome || 0) < 0
+              ? 'bg-gradient-to-br from-red-50 to-rose-50'
+              : 'bg-gradient-to-br from-amber-50 to-orange-50'
+        }`}>
+          <div className="text-center">
+            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-3 ${
+              goalProgress?.goalAchieved
+                ? 'bg-green-100 text-green-800'
+                : (goalProgress?.projectedAnnualIncome || 0) < 0
+                  ? 'bg-red-100 text-red-800'
+                  : 'bg-amber-100 text-amber-800'
+            }`}>
+              {goalProgress?.goalAchieved
+                ? 'Goal Achievable'
+                : (goalProgress?.projectedAnnualIncome || 0) < 0
+                  ? 'Negative Cash Flow'
+                  : 'Goal In Progress'}
             </div>
-            <div>
-              <p className="text-2xl font-bold text-green-600">+{propertiesBought}</p>
-              <p className="text-xs text-gray-500">Properties Bought</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-primary-600">{saleScenario?.trulyDebtFreeCount || 0}</p>
-              <p className="text-xs text-gray-500">
-                {saleScenario?.propertiesWithDebtCount > 0
-                  ? `Debt-Free (${saleScenario.debtFreeProperties.length} kept)`
-                  : 'Debt-Free Final'}
-              </p>
-            </div>
+
+            <h2 className={`text-3xl font-bold ${(goalProgress?.projectedAnnualIncome || 0) < 0 ? 'text-red-600' : 'text-gray-900'}`}>
+              {formatCurrency(goalProgress?.projectedAnnualIncome || 0)}
+              <span className="text-lg font-normal text-gray-500">/year</span>
+            </h2>
+
+            <p className="text-gray-600 mt-1">
+              {(goalProgress?.projectedAnnualIncome || 0) < 0
+                ? 'More time or properties needed'
+                : `Projected passive income in ${formatYears(targetYears)}`}
+            </p>
           </div>
         </div>
+
+        {/* Key metrics grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div className="text-center p-3 bg-gray-50 rounded-lg">
+            <p className="text-2xl font-bold text-gray-900">{totalPropertyCount}</p>
+            <p className="text-xs text-gray-500">Properties at Peak</p>
+          </div>
+          <div className="text-center p-3 bg-green-50 rounded-lg">
+            <p className="text-2xl font-bold text-green-600">+{propertiesBought}</p>
+            <p className="text-xs text-gray-500">Properties Bought</p>
+          </div>
+          <div className="text-center p-3 bg-blue-50 rounded-lg">
+            <p className="text-2xl font-bold text-blue-600">
+              {saleScenario?.trulyDebtFreeCount || 0}
+              {saleScenario?.propertiesWithDebtCount > 0 && (
+                <span className="text-sm font-normal text-amber-600"> +{saleScenario.propertiesWithDebtCount}</span>
+              )}
+            </p>
+            <p className="text-xs text-gray-500">Debt-Free Final</p>
+          </div>
+          <div className="text-center p-3 bg-purple-50 rounded-lg">
+            <p className="text-2xl font-bold text-purple-600">
+              {formatCurrency(
+                (saleScenario?.debtFreeProperties || []).reduce((sum, p) => sum + p.currentValue, 0),
+                true
+              )}
+            </p>
+            <p className="text-xs text-gray-500">Portfolio Value</p>
+          </div>
+        </div>
+
+        {/* Warning if remaining debt */}
+        {saleScenario?.remainingDebt > 0 && (
+          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-sm font-medium text-amber-800">
+              Remaining debt: {formatCurrency(saleScenario.remainingDebt)}
+            </p>
+            <p className="text-xs text-amber-700 mt-1">
+              Sale proceeds weren't enough to fully pay off all debt. Consider extending timeline or adding more properties.
+            </p>
+          </div>
+        )}
+
+        {/* Income breakdown */}
+        {saleScenario && (
+          <div className="p-3 bg-gray-50 rounded-lg text-sm mb-4">
+            <p className="font-medium text-gray-700 mb-2">Income Breakdown</p>
+            <div className="space-y-1 text-gray-600">
+              <div className="flex justify-between">
+                <span>Gross Rental Income</span>
+                <span>{formatCurrency(saleScenario.totalGrossRent || 0)}</span>
+              </div>
+              <div className="flex justify-between text-gray-500">
+                <span>Less: Vacancy & Holding Costs</span>
+                <span>-{formatCurrency((saleScenario.totalGrossRent || 0) - (saleScenario.totalNetRent || 0))}</span>
+              </div>
+              {saleScenario.remainingDebt > 0 && (
+                <div className="flex justify-between text-gray-500">
+                  <span>Less: Interest on Remaining Debt</span>
+                  <span>-{formatCurrency((saleScenario.totalNetRent || 0) - (saleScenario.totalNetCashFlow || 0))}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-medium pt-1 border-t border-gray-200">
+                <span>Net Cash Flow (pre-tax)</span>
+                <span className={saleScenario.totalNetCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}>
+                  {formatCurrency(saleScenario.totalNetCashFlow || 0)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>After Tax ({formatPercent(assumptions.taxBracket)} bracket)</span>
+                <span className={saleScenario.afterTaxIncome >= 0 ? 'text-green-600' : 'text-red-600'}>
+                  {formatCurrency(saleScenario.afterTaxIncome || 0)}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Progress to goal */}
+        {goalProgress && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600">Progress to Goal</span>
+              <span className={`text-sm font-medium ${goalProgress.goalAchieved ? 'text-green-600' : 'text-amber-600'}`}>
+                {formatPercent(goalProgress.percentAchieved / 100)}
+              </span>
+            </div>
+            <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  goalProgress.goalAchieved ? 'bg-green-500' : 'bg-amber-500'
+                }`}
+                style={{ width: `${Math.min(100, goalProgress.percentAchieved)}%` }}
+              />
+            </div>
+            <div className="flex justify-between mt-1 text-xs text-gray-500">
+              <span>Projected: {formatCurrency(goalProgress.projectedAnnualIncome)}/year</span>
+              <span>Target: {formatCurrency(annualIncomeGoal)}/year</span>
+            </div>
+          </div>
+        )}
       </Card>
 
       {/* Contact Us Prompt */}
@@ -366,9 +460,6 @@ export default function Roadmap() {
 
       {/* Actionable Insights */}
       <WhatToDoNext insights={insights} />
-
-      {/* Gap Analysis - only shown when goal not achieved */}
-      {gapAnalysis && <GapAnalysisCard gapAnalysis={gapAnalysis} targetYears={targetYears} />}
 
       {/* Levers Analysis - what has biggest impact */}
       <LeversCard leversAnalysis={leversAnalysis} />
@@ -515,117 +606,6 @@ export default function Roadmap() {
           </div>
         </CollapsibleSection>
       )}
-
-      {/* Final Numbers */}
-      <Card title="Final Position" subtitle={`After ${targetYears} years`}>
-        {/* Warning if remaining debt */}
-        {saleScenario?.remainingDebt > 0 && (
-          <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-            <p className="text-sm font-medium text-amber-800">
-              Remaining debt: {formatCurrency(saleScenario.remainingDebt)}
-            </p>
-            <p className="text-xs text-amber-700 mt-1">
-              Sale proceeds weren't enough to fully pay off all debt. Consider extending timeline or adding more properties.
-            </p>
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <p className="text-2xl font-bold text-gray-900">
-              {saleScenario?.trulyDebtFreeCount || 0}
-              {saleScenario?.propertiesWithDebtCount > 0 && (
-                <span className="text-sm font-normal text-amber-600"> +{saleScenario.propertiesWithDebtCount}</span>
-              )}
-            </p>
-            <p className="text-xs text-gray-500">
-              {saleScenario?.propertiesWithDebtCount > 0
-                ? 'Debt-Free + With Debt'
-                : 'Debt-Free Properties'}
-            </p>
-          </div>
-          <div className="text-center p-3 bg-green-50 rounded-lg">
-            <p className="text-2xl font-bold text-green-600">
-              {formatCurrency(saleScenario?.totalGrossRent || 0, true)}
-            </p>
-            <p className="text-xs text-gray-500">Gross Rental Income</p>
-          </div>
-          <div className="text-center p-3 bg-blue-50 rounded-lg">
-            <p className={`text-2xl font-bold ${(saleScenario?.totalNetCashFlow || 0) >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-              {formatCurrency(saleScenario?.totalNetCashFlow || 0, true)}
-            </p>
-            <p className="text-xs text-gray-500">Net Cash Flow</p>
-          </div>
-          <div className="text-center p-3 bg-purple-50 rounded-lg">
-            <p className="text-2xl font-bold text-purple-600">
-              {formatCurrency(
-                (saleScenario?.debtFreeProperties || []).reduce((sum, p) => sum + p.currentValue, 0),
-                true
-              )}
-            </p>
-            <p className="text-xs text-gray-500">Portfolio Value</p>
-          </div>
-        </div>
-
-        {/* Income breakdown */}
-        {saleScenario && (
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
-            <p className="font-medium text-gray-700 mb-2">Income Breakdown</p>
-            <div className="space-y-1 text-gray-600">
-              <div className="flex justify-between">
-                <span>Gross Rental Income</span>
-                <span>{formatCurrency(saleScenario.totalGrossRent || 0)}</span>
-              </div>
-              <div className="flex justify-between text-gray-500">
-                <span>Less: Vacancy & Holding Costs</span>
-                <span>-{formatCurrency((saleScenario.totalGrossRent || 0) - (saleScenario.totalNetRent || 0))}</span>
-              </div>
-              {saleScenario.remainingDebt > 0 && (
-                <div className="flex justify-between text-gray-500">
-                  <span>Less: Interest on Remaining Debt</span>
-                  <span>-{formatCurrency((saleScenario.totalNetRent || 0) - (saleScenario.totalNetCashFlow || 0))}</span>
-                </div>
-              )}
-              <div className="flex justify-between font-medium pt-1 border-t border-gray-200">
-                <span>Net Cash Flow (pre-tax)</span>
-                <span className={saleScenario.totalNetCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}>
-                  {formatCurrency(saleScenario.totalNetCashFlow || 0)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>After Tax ({formatPercent(assumptions.taxBracket)} bracket)</span>
-                <span className={saleScenario.afterTaxIncome >= 0 ? 'text-green-600' : 'text-red-600'}>
-                  {formatCurrency(saleScenario.afterTaxIncome || 0)}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Comparison to Goal */}
-        {goalProgress && (
-          <div className="mt-4 pt-4 border-t">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">Progress to Goal</span>
-              <span className={`text-sm font-medium ${goalProgress.goalAchieved ? 'text-green-600' : 'text-amber-600'}`}>
-                {formatPercent(goalProgress.percentAchieved / 100)}
-              </span>
-            </div>
-            <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all ${
-                  goalProgress.goalAchieved ? 'bg-green-500' : 'bg-amber-500'
-                }`}
-                style={{ width: `${Math.min(100, goalProgress.percentAchieved)}%` }}
-              />
-            </div>
-            <div className="flex justify-between mt-1 text-xs text-gray-500">
-              <span>Current: {formatCurrency(goalProgress.projectedAnnualIncome)}/year</span>
-              <span>Target: {formatCurrency(annualIncomeGoal)}/year</span>
-            </div>
-          </div>
-        )}
-      </Card>
 
       {/* Tip about assumptions */}
       {propertiesBought === 0 && (
