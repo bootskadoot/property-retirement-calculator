@@ -319,13 +319,17 @@ export function generateProjection(properties, cashAvailable, assumptions, targe
     const availableFunds = extractableEquity + accumulatedCash
     const newPropertiesPossible = Math.floor(availableFunds / depositRequired)
 
-    // Refinance check - can we buy properties this year?
-    const canRefinance = year > 0 && year % refinanceInterval === 0
+    // Can we buy properties this year?
+    // Year 0: Can buy with cash only (no refinancing needed)
+    // Other years: Can buy at refinance intervals using cash + extracted equity
+    const isRefinanceYear = year > 0 && year % refinanceInterval === 0
+    const canPurchaseYear0 = year === 0 && accumulatedCash >= depositRequired
+    const canPurchase = canPurchaseYear0 || isRefinanceYear
     let propertiesPurchased = 0
     let refinanceAmount = 0
     let cashUsed = 0
 
-    if (canRefinance && newPropertiesPossible > 0) {
+    if (canPurchase && newPropertiesPossible > 0) {
       // Purchase new properties
       propertiesPurchased = Math.min(newPropertiesPossible, 3) // Cap at 3 per interval for realism
       const totalCost = propertiesPurchased * depositRequired
@@ -393,10 +397,13 @@ export function generateProjection(properties, cashAvailable, assumptions, targe
       }))
     }
 
-    // Accumulate positive cash flow
+    // Accumulate cash flow (positive or negative)
+    // Negative cash flow from holding properties reduces available funds
     const totalCashFlow = yearProperties.reduce((sum, p) => sum + p.cashFlow, 0)
-    if (totalCashFlow > 0) {
-      accumulatedCash += totalCashFlow
+    accumulatedCash += totalCashFlow
+    // Don't let cash go negative - assume investor covers shortfall from income
+    if (accumulatedCash < 0) {
+      accumulatedCash = 0
     }
 
     // Recalculate totals to include any new properties
@@ -412,7 +419,7 @@ export function generateProjection(properties, cashAvailable, assumptions, targe
         accumulatedCash
       },
       events: {
-        canRefinance,
+        canRefinance: isRefinanceYear,
         propertiesPurchased,
         refinanceAmount,
         cashUsed,
