@@ -8,7 +8,8 @@ export default function ResultsSummary() {
   const { state } = useCalculator()
   const { saleScenario, goalProgress, projection, portfolioTotals, targetYears } = useCalculations()
 
-  if (!saleScenario || !goalProgress || state.properties.length === 0) {
+  // Show empty state only if no projection is available (no properties AND no cash)
+  if (!saleScenario || !goalProgress || projection.length === 0) {
     return (
       <Card title="Retirement Scenario">
         <div className="text-center py-12 text-gray-500">
@@ -16,7 +17,7 @@ export default function ResultsSummary() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
           <p className="text-lg font-medium">Enter Your Portfolio Details</p>
-          <p className="mt-1">Add properties and set your goals to see your retirement projection</p>
+          <p className="mt-1">Add properties or cash to invest to see your retirement projection</p>
         </div>
       </Card>
     )

@@ -183,7 +183,8 @@ export default function ExportButton() {
     }
   }
 
-  if (state.properties.length === 0) {
+  // Hide if no projection available (no properties AND no cash)
+  if (projection.length === 0) {
     return null
   }
 

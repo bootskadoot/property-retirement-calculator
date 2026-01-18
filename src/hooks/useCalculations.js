@@ -57,7 +57,8 @@ export function useCalculations() {
 
   // Generate year-by-year projection
   const projection = useMemo(() => {
-    if (properties.length === 0) return []
+    // Allow projection even with no properties (cash-only start)
+    if (properties.length === 0 && cashAllocated === 0) return []
 
     const propertiesWithDefaults = properties.map(p => ({
       ...p,
@@ -160,7 +161,8 @@ export function useCalculations() {
 
   // Calculate levers analysis - what has biggest impact
   const leversAnalysis = useMemo(() => {
-    if (properties.length === 0) return null
+    // Allow levers analysis with cash-only (no properties)
+    if (properties.length === 0 && cashAllocated === 0) return null
     return calculateLeversAnalysis(
       properties,
       cashAllocated,

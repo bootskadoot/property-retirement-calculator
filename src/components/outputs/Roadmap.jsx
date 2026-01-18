@@ -270,7 +270,8 @@ export default function Roadmap() {
     leversAnalysis
   } = useCalculations()
 
-  if (state.properties.length === 0) {
+  // Show empty state only if no properties AND no cash allocated AND no projection
+  if (projection.length === 0) {
     return (
       <Card>
         <div className="text-center py-12">
@@ -281,7 +282,7 @@ export default function Roadmap() {
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-1">Your Journey Awaits</h3>
           <p className="text-gray-500 max-w-md mx-auto">
-            Add your current properties in the Portfolio tab to see your personalized roadmap to {formatCurrency(annualIncomeGoal)}/year passive income.
+            Add your current properties or cash to invest in the Portfolio tab to see your personalized roadmap to {formatCurrency(annualIncomeGoal)}/year passive income.
           </p>
         </div>
       </Card>

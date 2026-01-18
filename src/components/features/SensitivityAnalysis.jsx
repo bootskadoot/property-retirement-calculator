@@ -27,7 +27,8 @@ export default function SensitivityAnalysis() {
   const [selectedVariable, setSelectedVariable] = useState('appreciationRate')
 
   const sensitivityData = useMemo(() => {
-    if (state.properties.length === 0) return []
+    // Allow analysis with cash-only (no properties)
+    if (state.properties.length === 0 && state.cashAllocated === 0) return []
 
     const variable = VARIABLES.find(v => v.key === selectedVariable)
     if (!variable) return []
@@ -75,11 +76,12 @@ export default function SensitivityAnalysis() {
   const currentVariable = VARIABLES.find(v => v.key === selectedVariable)
   const currentValue = assumptions[selectedVariable]
 
-  if (state.properties.length === 0) {
+  // Show empty state only if no properties AND no cash
+  if (state.properties.length === 0 && state.cashAllocated === 0) {
     return (
       <Card title="Sensitivity Analysis">
         <div className="py-8 text-center text-gray-500">
-          Add properties to see how different assumptions affect your results
+          Add properties or cash to invest to see how different assumptions affect your results
         </div>
       </Card>
     )
